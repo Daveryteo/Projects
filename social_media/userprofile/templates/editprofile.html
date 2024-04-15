@@ -1,0 +1,64 @@
+{% extends "./base.html" %}
+{% block content %}
+    {% load static %}
+    <form method="post" action="edit_user_profile" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="container-xl px-4 my-4">
+            <div class="row">
+                <div class="col-xl-4">
+                    <div class="card mb-4 mb-xl-0">
+                        <div class="card-header">Profile Picture</div>
+                        <div class="card-body text-center">
+                            {% if profile_form.pfp.value != 'user.png' %}
+                                <img src="media/{{ profile_form.pfp.value }}" class="img-account-profile rounded-circle my-3" width="90px">
+                            {% else %}
+                                <img src="{% static 'user.png' %}" class="img-account-profile rounded-circle my-3" width="90px">
+                            {% endif %}
+                            <div class="small font-italic text-muted mb-4">Upload a profile picture</div>
+                            {{ profile_form.pfp }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-8">
+                    <div class="card mb-4">
+                        <div class="card-header">Account Details</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="small mb-1" for="username">Username</label>
+                                {{ user_form.username }}
+                            </div>
+                            <div class="row gx-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="small mb-1" for="first_name">First name</label>
+                                    {{ user_form.first_name }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small mb-1" for="last_name">Last name</label>
+                                    {{ user_form.last_name }}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small mb-1" for="email">Email address</label>
+                                {{ user_form.email }}
+                            </div>
+                            <div class="row gx-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="small mb-1" for="dob">Date of Birth</label>
+                                    {{ profile_form.dob }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 text-left">
+                                    <button class="btn btn-secondary" type="reset">Reset</button>
+                                </div>
+                                <div class="col-md-8 text-right">
+                                    <button class="btn btn-secondary" type="submit">Save changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock content %}

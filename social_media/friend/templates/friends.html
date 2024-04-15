@@ -1,0 +1,261 @@
+{% extends "./base.html" %}
+{% block content %}
+    {% load static %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-4 my-5">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-7">
+                                {% if profile.image != 'user.png' %}
+                                    <img src="/media/{{ profile.image }}" class="rounded-circle pull-left" width="50%">
+                                {% else %}
+                                    <img src="{% static 'user.png' %}" class="rounded-circle pull-left" width="50%">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-5 mt-2 px-2">
+                                {% if is_friend == False %}
+                                    {% if request_state == 0 %}
+                                        <button class="btn btn-secondary pull-right mb-2" id="cancelRequestBtn" onclick="cancel_request('{{user.id}}', update_page)" style="font-size: 12px;">Cancel Request</button>
+                                    {% endif %}
+                                    {% if request_state == 1 %}
+                                        <button class="btn btn-secondary pull-right mb-2" id="id_confirm_{{id}}" onclick='accept_request("{{req_id}}", update_page)' style="font-size: 12px;">Accept Request</button>>
+                                        <button class="btn btn-secondary pull-right mb-2" id="id_cancel_{{id}}" onclick='decline_request("{{req_id}}", update_page)' style="font-size: 12px;">Decline Request</button>
+                                    {% endif %}
+                                    {% if request_status == 2 %}
+                                        <button class="btn btn-secondary pull-right mb-2" id="sendRequestBtn" onclick="send_request('{{user.id}}', update_page)" style="font-size: 12px;">Send Request</button>
+                                    {% endif %}
+                                {% elif is_friend == True %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary pull-right mb-2 dropdown-toggle friends-btn" type="button" id="friends_toggle" data-toggle="dropdown">
+                                            &nbsp Friends
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#" onclick="remove_friend('{{user.id}}', update_page)">Unfriend</a>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-secondary pull-right mb-2" href="chat">&nbsp Message &nbsp</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="card-text my-2">{{ user.username }}</p>
+                    </div>
+                    <div class="card-body">
+                        <label class="small my-2" for="name">Name:</label>
+                        <span class="card-text" id="name">{{ user.first_name }} {{ user.last_name }}</span>
+                        <br>
+                        <label class="small my-2" for="emailAddress">Email address:</label>
+                        <span class="card-text" id="emailAddress">{{ user.email }}</span>
+                        <br>
+                        <label class="small my-2" for="dob">Date of Birth:</label>
+                        <span class="card-text" id="dob">{{ profile.dob }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-8 my-5 mx-auto">
+                <!-- Tabs -->
+                <div class="tabs-wrapper profile-tabs">
+                    <ul class="nav nav-tabs mb-4">
+                        <li>
+                            <button class="nav-link active" href="#tab-posts" data-toggle="tab">Posts</button>
+                        </li>
+                        <li>
+                            <button class="nav-link" href="#tab-friends" data-toggle="tab">Friends ( {{ friend_list|length }} )</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active col-md-9 mx-auto" id="tab-posts">
+                            {% if is_friend == False %}
+                                <div class="text-secondary d-flex flex-row justify-content-center p-4">
+                                    <p>Become friends to view their posts</p>
+                                </div>
+                            {% elif is_friend == True %}
+                                {% if posts %}
+                                    {% for post in posts %}
+                                        <div class="card mx-auto my-5">
+                                            <div class="card-header bg-secondary text-light">
+                                                <img src="/media/{{ profile.image }}" class="rounded-circle profile">
+                                                &nbsp
+                                                {{post.user.username}}
+                                            </div>
+                                            {% if post.content_image %}
+                                                <img class="card-img-top" src="/media/{{post.images}}" alt="Card image cap">
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <p class="card-text">{{post.content}}</p>
+                                                <a href="#" id="likeIcon" onclick="toggleLike(); return false">
+                                                    <i class="fa-regular fa-heart"></i>
+                                                </a>
+                                                &nbsp&nbsp
+                                                <a href="#message" data-toggle="collapse">
+                                                    <i class="fa-solid fa-message"></i>
+                                                </a>
+                                            
+                                                <div class="row">
+                                                    <!-- Post's View Comments Link -->
+                                                    <a href="#hidden" data-toggle="collapse" class="text-secondary col-md-7">
+                                                        <p>View comments</p>
+                                                    </a>
+                                                    <p class="col-md-5 text-right text-secondary" style="font-size: 14px;">{{post.timeposted}}</p>
+                                                </div>
+                                    
+                                                <!-- Post's View Comments -->
+                                                <div class="collapse" id="hidden">
+                                                    <img src="https://api.dicebear.com/7.x/icons/svg?seed=Bear" class="rounded-circle">
+                                                    &nbsp
+                                                    Nice Post!
+                                                </div>
+                                                <div class="collapse" id="messsage">
+                                                    <div class="input-group my-2">
+                                                        <input type="text" class="form-control" placeholder="Enter a comment">
+                                                        <div class="input-group-append">
+                                                        <button class="btn btn-outline-secondary" type="submit">Comment</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-secondary d-flex flex-row justify-content-center p-4">
+                                        <p>No posts</p>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="tab-friends">
+                            {% if is_friend == False %}
+                                <div class="text-secondary d-flex flex-row justify-content-center p-4">
+                                    <p>Become friends to see their friends list</p>
+                                </div>
+                            {% elif is_friend == True %}
+                                {% if friend_list %}
+                                    {% for friend in friend_list %}
+                                        <div class="row">
+                                            <div class="col-md-9">
+                                                {% for prof in friend_profile %}
+                                                    {% if prof.user == friend %}
+                                                        <img src="/media/{{ prof.image }}" class="rounded-circle ml-3" width="12%">
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <a class="card-text my-2 ml-3" href="friendDetails/{{ friend.user }}">{{ friend.user }}</a>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                    {% endfor %}
+                                    {% else %}
+                                        <div class="text-secondary d-flex flex-row justify-content-center p-4">
+                                            <p>No friends</p>
+                                        </div>
+                                    {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function update_page()
+        {
+            location.reload();
+        }
+
+        function send_request(id, update_page)
+        {
+            context = {"csrfmiddlewaretoken": "{{ csrf_token }}", "receiverID": id}
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{% url 'send_request' %}",
+                timeout: 3000,
+                data: context,
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+
+        function cancel_request(id, update_page)
+        {
+            context = {"csrfmiddlewaretoken": "{{ csrf_token }}", "receiverID": id}
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{% url 'cancel_request' %}",
+                data: context,
+                timeout: 3000,
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+
+        function remove_friend(id, update_page)
+        {
+            context = {
+                "csrfmiddlewaretoken": "{{ csrf_token }}",
+                "receiverID": id,
+            }
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{% url 'remove_friend' %}",
+                data: context,
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+
+        function accept_request(req_id, update_page)
+        {
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "{% url 'accept_request' req_id=test %}".replace("test", req_id),
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+
+        function decline_request(req_id, update_page)
+        {
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "{% url 'decline_request' req_id=test %}".replace("test", req_id),
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+
+        function toggleLike()
+            {
+                var like = document.getElementById("likeIcon").getElementsByTagName("i")[0];
+
+                if (like.classList.contains("fa-regular"))
+                {
+                    like.classList.remove("fa-regular")
+                    like.classList.add("fa-solid")
+                }
+                else
+                {
+                    like.classList.remove("fa-solid")
+                    like.classList.add("fa-regular")
+                }
+
+                return false;
+            }
+    </script>
+{% endblock content %}

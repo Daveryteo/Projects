@@ -1,0 +1,153 @@
+{% extends "./base.html" %}
+{% block content %}
+
+    {% if request.user.is_authenticated %}
+        <div class="col-md-5 mx-auto my-5">
+
+            <!-- new post form with enctype for uploading images -->
+            <div class="card mx-auto my-5">
+                <form method="post" action="/" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="card-header bg-secondary text-light">
+                        <div class="form-group">
+                            <label for="PostsImage">Select an image to upload...</label>
+                            <input type="file" class="form-control-file" name="PostsImage" oninput="add_image(this)">
+                        </div>
+                        <div class="image-area my-4">
+                            <img id="imageResult" src="#" alt="" class="img-fluid rounded shadow-sm mx-auto d-block">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form class="form-inline my-2 my-lg-0">
+                            <textarea class="form-control" placeholder="What is happening?!" style="min-width: 100%" rows="5" name="content"></textarea>
+                            <span class="input-group-append">
+                                <button class="btn btn-secondary text-light my-2 my-sm-2" type="submit">
+                                    Post
+                                </button>
+                            </span>
+                        </form>                
+                    </div>
+                </form>
+            </div>
+
+            {% for post in posts %}
+                <div class="card mx-auto my-5">
+                    <div class="card-header bg-secondary text-light">
+                        <!-- check if user has friends and loop through and
+                        if the username of the post is the same display pfp -->
+                        {% if profile|length > 1 %}
+                            {% for prof in profile %}
+                                {% if prof.users.username == post.users.username %}
+                                    <img src="/media/{{ prof.image }}" class="rounded-circle profile">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <img src="/media/{{ profile.image }}" class="rounded-circle profile">
+                        {% endif %}
+
+                        &nbsp
+                        {{post.user.username}}
+                    </div>
+
+                    {% if post.images %}
+                        <img class="card-img-top" src="media/{{post.images}}" alt="Card image cap">
+                    {% endif %}
+                    <div class="card-body">
+                        <p class="card-text">{{post.content}}</p>
+
+                        <a href="#" id="likeIcon" onclick="toggleLike(); return false">
+                            <i class="fa-regular fa-heart"></i>
+                        </a>
+                        &nbsp&nbsp
+
+                        <a href="#inputComments1" data-toggle="collapse">
+                            <i class="fa-solid fa-message"></i>
+                        </a>
+
+                        <div class="row">
+                            <a href="#collapseComments1" data-toggle="collapse" class="text-secondary col-md-7">
+                                <p>View comments</p>
+                            </a>
+                            <p class="col-md-5 text-right text-secondary" style="font-size: 14px;">{{post.timeposted}}</p>
+                        </div>
+
+                        <div class="collapse" id="collapseComments1">
+                            <img src=https://api.dicebear.com/7.x/icons/svg?seed=Bear" class="rounded-circle profile">
+                            &nbsp
+                            Nice Post!
+                        </div>
+
+                        <div class="collapse" id="inputComments1">
+                            <div class="input-group my-2">
+                                <input type="text" class="form-control" placeholder="Enter a comment">
+                                <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit">Comment</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            {% endfor %}
+            </div>
+
+
+        {% else %}
+        <div class="container text-center my-5 py-5" style="min-height: 300px;">
+            <h2>Welcome to My Social Hub</h2>
+            <div class="my-5">
+                <p>New to My Social Hub?
+                    <a href="register"> Register</a>
+                </p>
+                <p>Have an account?
+                    <a href="login">Sign in</a>
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <style>
+            #imageResult
+            {
+                max-width: 20rem;
+            }
+        </style>
+
+        <script>
+            function add_image(inputImage)
+            {
+                if (inputImage.files && inputImage.files[0])
+                {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e)
+                    {
+                        var image = e.target.result
+                        var imageField = document.getElementById('imageResult')
+                        imageField.src = image
+                    };
+                    reader.readAsDataURL(inputImage.files[0]);
+                }
+            }
+
+            function toggleLike()
+            {
+                var like = document.getElementById("likeIcon").getElementsByTagName("i")[0];
+
+                if (like.classList.contains("fa-regular"))
+                {
+                    like.classList.remove("fa-regular")
+                    like.classList.add("fa-solid")
+                }
+                else
+                {
+                    like.classList.remove("fa-solid")
+                    like.classList.add("fa-regular")
+                }
+
+                return false;
+            }
+        </script>
+
+{% endblock content %}

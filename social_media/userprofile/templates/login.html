@@ -1,0 +1,33 @@
+{% extends "./base.html" %}
+{% block content %}
+    {% load static %}
+    <div class="col-md-6 mx-auto my-5">
+        <div class="card">
+            <div class="card-header bg-dark text-light">
+                Login
+            </div>
+            <div class="card-body">
+                <img class="rounded-circle img-fluid mx-auto my-3 d-block" width="30%" src="{% static 'user.png' %}">
+                <form id="login_form" method="post" action="login" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="small mb-1" for="username">Username</label>
+                        <input class="form-control" id="username" name="username" type="text" placeholder="Username">
+                    </div>
+                    <div class="mb-3">
+                        <label class="small mb-1" for="password">Password</label>
+                        <input class="form-control" id="password" name="password" type="password" placeholder="Password">
+                    </div>
+                    <div class="row">
+                        <div class="col-9 col-md-10 my-auto">
+                            <a href="#" class="forgot-password">Forgot password?</a>
+                        </div>
+                        <div class="col-3 col-md-2">
+                            <input class="btn btn-dark text-light px-2" type="submit" name="submit" value="Login" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

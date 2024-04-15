@@ -1,0 +1,226 @@
+{% extends "./base.html" %}
+{% block content %}
+    {% load static %}
+    
+    {% if request.user.is_authenticated %}
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-4 my-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-md-7 mt-2">
+                                    {% if profile_form.image.value != 'user.png' %}
+                                        <img src="/media/{{ profile_form.image.value }}" class="rounded-circle pull-left" width="90px">
+                                    {% else %}
+                                        <img src="{% static 'user.png' %}" class="rounded-circle pull-left" width="90px">
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-5 mt-2">
+                                    <a class="btn btn-secondary pull-right mb-2" href="editprofile">Edit Profile</a>
+                                </div>
+                            </div>
+                            <p class="card-text my-2">{{ user_form.username.value }}</p>
+                        </div>
+                        <form id="user_form" method="get" action="profile">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <label class="small my-2" for="name">Name:</label>
+                                <span class="card-text" id="name">{{ user_form.first_name.value }} {{ user_form.last_name.value }}</span>
+                                <br>
+                                <label class="small my-2" for="emailAddress">Email address:</label>
+                                <span class="card-text" id="emailAddress">{{ user_form.email.value }}</span>
+                                <br>
+                                <label class="small my-2" for="dob">Date of Birth:</label>
+                                <span class="card-text" id="dob">{{ profile_form.dob.value }}</span>
+                            </div>
+                        </form>
+                    </div>
+                    {% if friend_requests %}
+                        <div class="my-5">
+                            <h5 class="mx-auto text-center text-secondary">Friend Requests ( {{ friend_requests|length }} )</h5>
+                            {% for sender, image, req_id in sender_info %}
+                                <div class="card my-2">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6 col-md-6">
+                                                    <img src="{{ image }}" class="rounded-circle pull-left" width="40px">
+                                                    <a class="ml-2" href="friendDetails/{{ sender }}">{{ sender }}</a>
+                                            </div>
+                                            <div class="col-6 col-md-6 my-auto">
+                                                <button class="btn btn-secondary pull-right" id="id_confirm_{{id}}" onclick='accept_request("{{req_id}}", update_page)' style="font-size: 12px;">Accept</button>
+                                                <button class="btn btn-secondary pull-right" id="id_cancel_{{id}}" onclick='decline_request("{{req_id}}", update_page)'  style="font-size: 12px;">Decline</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-secondary d-flex flex-row justify-content-center p-4">
+                            <p>No friend requests</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-md-8 my-5 mx-auto">
+                    <!-- Tabs -->
+                    <div class="tabs-wrapper profile-tabs">
+                        <ul class="nav nav-tabs mb-4">
+                            <li>
+                                <button class="nav-link active" href="#tab-posts" data-toggle="tab">Posts</button>
+                            </li>
+                            <li>
+                                <button class="nav-link" href="#tab-friends" data-toggle="tab">Friends ( {{ friend_list|length }} )</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active col-md-9 mx-auto" id="tab-posts">
+                                {% if posts %}
+                                    {% for post in posts %}
+                                        <div class="card mx-auto my-5">
+                                            <div class="card-header bg-secondary text-light">
+                                                <img src="/media/{{ profile_form.image.value }}" class="rounded-circle profile">
+                                                &nbsp
+                                                {{post.user.username}}
+                                            </div>
+                                            {% if post.content_image %}
+                                                <img class="card-img-top" src="/media/{{post.images}}" alt="Card image cap">
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <p class="card-text">{{post.content}}</p>
+                                                <a href="#" id="likeIcon" onclick="toggleLike(); return false">
+                                                    <i class="fa-regular fa-heart"></i>
+                                                </a>
+                                                &nbsp&nbsp
+                                                <a href="#message" data-toggle="collapse">
+                                                    <i class="fa-solid fa-message"></i>
+                                                </a>
+                                            
+                                                <div class="row">
+                                                    <a href="#collapseComments1" data-toggle="collapse" class="text-secondary col-md-7">
+                                                        <p>View comments</p>
+                                                    </a>
+                                                    <p class="col-md-5 text-right text-secondary" style="font-size: 14px;">{{post.timeposted}}</p>
+                                                </div>
+
+                                                <div class="collapse" id="collapseComments1">
+                                                    <img src="https://api.dicebear.com/7.x/icons/svg?seed=Bear" class="rounded-circle">
+                                                    &nbsp
+                                                    Nice Post!
+                                                </div>
+
+                                                <div class="collapse" id="inputComments1">
+                                                        <input type="text" class="form-control" placeholder="Enter a comment">
+                                                        <div class="input-group-append">
+                                                        <button class="btn btn-outline-secondary" type="submit">Comment</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-secondary d-flex flex-row justify-content-center p-4">
+                                        <p>No posts </p>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="tab-pane fade" id="tab-friends">
+                                {% if friend_list %}
+                                    {% for friend in friend_list %}
+                                        <div class="row">
+                                            <div class="col-md-9">
+                                                {% for p in profile %}
+                                                    {% if p.user == friend %}
+                                                        <img src="/media/{{ p.image }}" class="rounded-circle ml-3" width="12%">
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <a class="card-text my-2 ml-3" href="friendDetails/{{ friend.user }}">{{ friend.current_user }}</a>
+                                            </div>
+                                            <div class="col-md-3 my-auto">
+                                                <a class="btn btn-secondary pull-right" href="#" onclick="remove_friend('{{friend.id}}', update_page)">Remove Friend</a>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                    {% endfor %}
+                                    {% else %}
+                                        <div class="text-secondary d-flex flex-row justify-content-center p-4">
+                                            <p>No friends</p>
+                                        </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="container text-center my-5 py-5" style="min-height: 300px;">
+            <h2>Welcome to My Social Hub</h2>
+            <div class="my-5">
+                <p>New to My Social Hub?
+                    <a href="register"> Register</a>
+                </p>
+                <p>Have an account?
+                    <a href="login">Sign in</a>
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+        function update_page()
+        {
+            location.reload();
+        }
+
+        function accept_request(req_id, update_page)
+        {
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "{% url 'accept_request' req_id=test %}".replace("test", req_id),
+                timeout: 3000,
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+
+        function decline_request(req_id, update_page)
+        {
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: "{% url 'decline_request' req_id=test %}".replace("test", req_id),
+                timeout: 3000,
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+
+        function remove_friend(id, update_page)
+        {
+            context = {
+                "csrfmiddlewaretoken": "{{ csrf_token }}",
+                "receiverID": id,
+            }
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{% url 'remove_friend' %}",
+                data: context,
+                timeout: 3000,
+                complete: function(data)
+                {
+                    update_page()
+                },
+            });
+        }
+    </script>
+{% endblock content %}
