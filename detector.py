@@ -87,13 +87,10 @@ age_model.summary()
 gender_model.summary()
 age_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 gender_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-age_model.layers[0].set_trainable(False)
-gender_model.layers[0].set_trainable(False)
-
-for layer in age_model.layers[1:]:
+for layer in age_model.layers[0:]:
     layer.trainable = False
 
-for layer in gender_model.layers[1:]:
+for layer in gender_model.layers[0:]:
     layer.trainable = False
 age_model.load_weights("weights/age_model.h5")
 gender_model.load_weights("weights/gender_model.h5")
